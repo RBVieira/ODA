@@ -1,0 +1,6 @@
+@ODA_HostAddress = http://localhost:5216
+
+GET {{ODA_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

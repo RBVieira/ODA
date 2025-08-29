@@ -1,0 +1,6 @@
+@Tmf632.PartyManagement.Api_HostAddress = http://localhost:5286
+
+GET {{Tmf632.PartyManagement.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
