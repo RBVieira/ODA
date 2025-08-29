@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace Tmf632.PartyManagement.Api.Models
 {
@@ -6,6 +7,7 @@ namespace Tmf632.PartyManagement.Api.Models
     public class Characteristic
     {
         [Key]
+        [ValidateNever]
         public string Id { get; set; }
         public string Name { get; set; }
         public string Value { get; set; }

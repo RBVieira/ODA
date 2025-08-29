@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -8,6 +9,7 @@ namespace Tmf632.PartyManagement.Api.Models
     {
         // A anotação [Key] define esta propriedade como a chave primária.
         [Key]
+        [ValidateNever]
         public string Id { get; set; }
 
         // Propriedades para dados da organização.
