@@ -6,16 +6,11 @@ namespace Tmf632.PartyManagement.Api.Models
     public class Characteristic
     {
         [Key]
-        public Guid Id { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
         public string Value { get; set; }
         public string IndividualId { get; set; }
 
-        // Construtor
-        public Characteristic()
-        {
-            Id = Guid.NewGuid();
-        }
     }
 
 }

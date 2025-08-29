@@ -10,20 +10,20 @@ namespace Tmf632.PartyManagement.Api.Models
         // A anotação [Key] define esta propriedade como a chave primária
         // do banco de dados.
         [Key]
-        public Guid Id { get; set; }
+        public string Id { get; set; }
 
         // Propriedades para dados pessoais básicos
-        [Required, MaxLength(100)]
+        [Required]
         public string FamilyName { get; set; }
-        [Required, MaxLength(100)]
+        [Required]
         public string GivenName { get; set; }
-        [Required, MaxLength(100)]
+        [Required]
         public string FullName { get; set; }
 
         // Propriedades para contato e endereço
-        [Required, MaxLength(100)]
+        [Required]
         public string Gender { get; set; }
-        [Required, MaxLength(100)]
+        [Required]
         public string Nationality { get; set; }
         public DateTime? BirthDate { get; set; }
 
@@ -36,7 +36,7 @@ namespace Tmf632.PartyManagement.Api.Models
         // Construtor
         public Individual()
         {
-            Id = Guid.NewGuid();
+            Id = Guid.NewGuid().ToString();
         }
 
     }

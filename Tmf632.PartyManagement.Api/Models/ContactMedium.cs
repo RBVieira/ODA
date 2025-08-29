@@ -6,18 +6,12 @@ namespace Tmf632.PartyManagement.Api.Models
     public class ContactMedium
     {
         [Key]
-        public Guid Id { get; set; }
+        public string Id { get; set; }
         public string MediumType { get; set; }
         public string Preferred { get; set; }
         public string Value { get; set; }
         public string IndividualId { get; set; }
 
-
-        // Construtor
-        public ContactMedium()
-        {
-            Id = Guid.NewGuid();
-        }
     }
     
 

@@ -8,28 +8,28 @@ namespace Tmf632.PartyManagement.Api.Models
     {
         // A anotação [Key] define esta propriedade como a chave primária.
         [Key]
-        public Guid Id { get; set; }
+        public string Id { get; set; }
 
         // Propriedades para dados da organização.
-        [Required, MaxLength(100)]
+        [Required]
         public string Name { get; set; }
-        [Required, MaxLength(100)]
+        [Required]
         public string TradingName { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        [MaxLength(100)]
+
         public string IsHeadOffice { get; set; }
 
         // Coleções para relacionamentos com outras entidades, seguindo o padrão
         // que usamos para a classe Individual.
-        public List<ContactMedium> ContactMedium { get; set; }
-        public List<RelatedParty> RelatedParty { get; set; }
-        public List<Characteristic> Characteristic { get; set; }
+        public List<ContactMedium> ContactMedium { get; set; } = new();
+        public List<RelatedParty> RelatedParty { get; set; } = new();
+        public List<Characteristic> Characteristic { get; set; } = new();
 
         // Construtor
         public Organization()
         {
-            Id = Guid.NewGuid();
+            Id = Guid.NewGuid().ToString();
         }
     }
 }
