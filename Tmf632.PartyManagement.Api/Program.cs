@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using Tmf632.PartyManagement.Api.Data;
 
+//TESTE
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
