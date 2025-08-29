@@ -12,6 +12,7 @@ namespace Tmf632.PartyManagement.Api.Models
         public string MediumType { get; set; }
         public string Preferred { get; set; }
         public string Value { get; set; }
+        [ValidateNever]
         public string IndividualId { get; set; }
 
     }

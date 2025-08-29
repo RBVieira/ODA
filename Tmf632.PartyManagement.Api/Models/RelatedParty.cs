@@ -12,6 +12,7 @@ namespace Tmf632.PartyManagement.Api.Models
         public string PartyId { get; set; }
         public string Role { get; set; }
         public string RelationshipType { get; set; }
+        [ValidateNever]
         public string IndividualId { get; set; }
 
         // Construtor
