@@ -1,0 +1,70 @@
+## 🔧 Build e dependências
+bin/
+obj/
+packages/
+*.dll
+*.exe
+*.app
+*.log
+
+## 🧪 Testes e cobertura
+TestResults/
+*.coverage
+*.coveragexml
+*.trx
+
+## 🧠 Configurações de usuário
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.vspscc
+*.vssscc
+
+## 🌐 ASP.NET Core
+appsettings.*.json
+secrets.json
+
+## 🌍 URLs locais e arquivos HTTP
+*.http
+*.rest
+
+## 🧠 Visual Studio
+.vs/
+.vscode/
+*.dbmdl
+*.pdb
+*.cache
+*.ide
+
+## 📦 NuGet
+*.nupkg
+.nuget/
+project.lock.json
+project.fragment.lock.json
+
+## 🔄 Configurações temporárias
+*.tmp
+*.bak
+*.old
+*.orig
+
+## 📁 Diretórios ocultos e de sistema
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+## 🧪 Rider / JetBrains
+.idea/
+*.sln.iml
+
+## 📄 Logs e relatórios
+*.log
+*.tlog
+*.jfm
+
+## 🧼 Outros
+_ReSharper*/
+*.DotSettings.user
+*.swp
+*.slnLaunch.json
