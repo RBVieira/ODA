@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tmf683.PartyInteraction.Api.Data;
-using Tmf683.PartyInteraction.Api.Models;
+using Tmf683.PartyInteraction.Api.Models.Entities;
 using Tmf683.PartyInteraction.Api.Repositories.Interfaces;
 
 namespace Tmf683.PartyInteraction.Api.Repositories
@@ -22,13 +22,13 @@ namespace Tmf683.PartyInteraction.Api.Repositories
 
 
         //Busca uma interação de party pelo ID, incluindo a entidade RelatedParty
-        public async Task<PartyInteract?> GetByIdAsync(string id)
+        public async Task<PartyInteract?> GetPartyInteractionByIdAsync(string id)
         {
             return await _context.PartyInteractions.Include(pi => pi.RelatedParty).FirstOrDefaultAsync(pi => pi.Id == id);
         }
 
         //UPDATE
-        public async Task UpdateAsync(PartyInteract entity)
+        public async Task UpdatePartyInteractionAsync(PartyInteract entity)
         {
             _context.PartyInteractions.Update(entity);
             await _context.SaveChangesAsync();
@@ -36,7 +36,7 @@ namespace Tmf683.PartyInteraction.Api.Repositories
 
         //Remove as entradas em RelatedPartyRef que é uma lista dentro de PartyInteract
         //PartyInteract é o que registra a interação, RelatedPartyRef são todas as partes envolvidas na interação
-        public async Task RemoveAsync(RelatedPartyRef entity)
+        public async Task RemovePartyInteractionAsync(RelatedPartyRef entity)
         {
             _context.RelatedPartyRefs.Remove(entity);
             await _context.SaveChangesAsync();

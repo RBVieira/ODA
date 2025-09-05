@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations;
 
-namespace Tmf683.PartyInteraction.Api.Models
+namespace Tmf683.PartyInteraction.Api.Models.Entities
 {
     public class RelatedPartyRef
     {

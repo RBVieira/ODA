@@ -41,7 +41,7 @@ builder.Services.AddScoped<IPartyInteractionService, PartyInteractionService>();
 builder.Services.AddScoped<IPartyInteractionRepository, PartyInteractionRepository>();
 
 // Adicionar o AutoMapper
-builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
+builder.Services.AddAutoMapper(cfg => cfg.AddProfile<AutoMapperProfile>());
 
 var app = builder.Build();
 

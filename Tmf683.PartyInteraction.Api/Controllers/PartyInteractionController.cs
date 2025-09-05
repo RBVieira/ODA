@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tmf683.PartyInteraction.Api.Data;
-using Tmf683.PartyInteraction.Api.Models;
 using Tmf683.PartyInteraction.Api.Models.Dtos;
 using AutoMapper;
 using System.Net.Http;
@@ -9,6 +8,8 @@ using System.Net;
 using Microsoft.Extensions.Options;
 using Tmf683.PartyInteraction.Api.Models.APIs;
 using Tmf683.PartyInteraction.Api.Services.Interfaces;
+using Tmf683.PartyInteraction.Api.Models.Entities;
+using System.Data;
 
 
 
@@ -42,7 +43,7 @@ public class PartyInteractionController : ControllerBase
 
     //Traz a relação de todas as interações do cliente ou organização
     [HttpGet]
-    public async Task<IActionResult> GetPartyInteractions()
+    public async Task<IActionResult> GetAllPartyInteractions()
     {
         var result = await _service.GetAllPartyInteractionsAsync();
         return Ok(result);
@@ -50,7 +51,7 @@ public class PartyInteractionController : ControllerBase
 
     //Consulta uma interação específica pelo seu ID
     [HttpGet("{id}")]
-    public async Task<ActionResult<PartyInteractionDto>> GetPartyInteractions(string id)
+    public async Task<ActionResult<PartyInteractionDto>> GetPartyInteractionsById(string id)
     {
         var interaction = await _context.PartyInteractions.Include(pi => pi.RelatedParty).FirstOrDefaultAsync(pi => pi.Id == id);
 
@@ -65,10 +66,10 @@ public class PartyInteractionController : ControllerBase
 
     // Operação de UPDATE (PATCH) em uma interação, seguindo o padrão TM Forum
     [HttpPatch("{id}")]
-    public async Task<IActionResult> PatchPartyInteraction(string id, [FromBody] PartyInteractionDto dto)
+    public async Task<IActionResult> UpdatePartyInteraction(string id, [FromBody] PartyInteractionDto dto)
     {
         //chamada do serviço que implementa a lógica de patch
-        return await _service.PatchInteractionAsync(id, dto);
+        return await _service.PatchPartyInteractionAsync(id, dto);
 
     }
 
@@ -77,8 +78,9 @@ public class PartyInteractionController : ControllerBase
     //Este POST é para criar uma nova interação para um cliente ou organização, o cliente ou organização deve existir na API TMF632
     //A API TMF683 Party Interaction atua como um orquestrador. Ela não armazena dados de Individual ou Organization em seu próprio banco de dados,
     //mas sim consulta a fonte oficial (TMF632) e armazena apenas a referência, criando uma nova interação associada a esse PartyId em seu banco de dados.
+    //TO DO - Implementar o patter service/repository
     [HttpPost]
-    public async Task<IActionResult> PostPartyInteraction([FromBody] PartyInteractionDto interactionDto)
+    public async Task<IActionResult> CreatePartyInteraction([FromBody] PartyInteractionDto interactionDto)
     {
         // 1. Validação de dados de entrada
         if (!ModelState.IsValid)
@@ -131,6 +133,14 @@ public class PartyInteractionController : ControllerBase
 
         // 4. Retorno HTTP com o recurso criado
         var createdInteractionDto = _mapper.Map<PartyInteractionDto>(interaction);
-        return CreatedAtAction(nameof(GetPartyInteractions), new { id = createdInteractionDto.Id }, createdInteractionDto);
+        return CreatedAtAction(nameof(GetPartyInteractionsById), new { id = createdInteractionDto.Id }, createdInteractionDto);
+    }
+
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeletePartyInteraction(string id)
+    {
+        //TO DO - Implementar lógica de exclusão
+        return NoContent();
     }
 }

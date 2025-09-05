@@ -2,13 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Tmf683.PartyInteraction.Api.Models.Dtos;
-using Tmf683.PartyInteraction.Api.Models;
 using Tmf683.PartyInteraction.Api.Services.Interfaces;
 using Tmf683.PartyInteraction.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Tmf683.PartyInteraction.Api.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.VisualBasic;
+using Tmf683.PartyInteraction.Api.Models.Entities;
 
 namespace Tmf683.PartyInteraction.Api.Services
 {
@@ -34,22 +34,22 @@ namespace Tmf683.PartyInteraction.Api.Services
         }
 
         //GET by ID
-        public async Task<PartyInteractionDto?> GetByIdAsync(string id)
+        public async Task<PartyInteractionDto?> GetPartyInteractionByIdAsync(string id)
         {
-            var interaction = await _repository.GetByIdAsync(id);
+            var interaction = await _repository.GetPartyInteractionByIdAsync(id);
             return _mapper.Map<PartyInteractionDto>(interaction);
         }
 
 
         //PATCH
-        public async Task<IActionResult> PatchInteractionAsync(string id, PartyInteractionDto dto)
+        public async Task<IActionResult> PatchPartyInteractionAsync(string id, PartyInteractionDto dto)
         {
             //Na operação de PATCH o ID no corpo é opcional, mas se fornecido deve corresponder ao ID na URL  
             if (!string.IsNullOrEmpty(dto.Id) && id != dto.Id)
                 return new BadRequestObjectResult("O ID na URL deve corresponder ao ID no corpo, se fornecido.");
 
-            //Busca a interação existente no banco de dados mas utiliza o método GetByIdAsync do repositório
-            var existing = await _repository.GetByIdAsync(id);
+            //Busca a interação existente no banco de dados mas utiliza o método GetPartyInteractionByIdAsync do repositório
+            var existing = await _repository.GetPartyInteractionByIdAsync(id);
 
             if (existing == null)
                 return new NotFoundResult();
@@ -84,8 +84,8 @@ namespace Tmf683.PartyInteraction.Api.Services
                 if (rpToRemove == null)
                     return new BadRequestObjectResult($"O RelatedParty com ID '{idToRemove}' não pertence à interação.");
 
-                // Remove da coleção na entidade PartyInteract utilizando o método RemoveAsync do repositório
-                _repository.RemoveAsync(rpToRemove);
+                // Remove da coleção na entidade PartyInteract utilizando o método RemovePartyInteractionAsync do repositório
+                _repository.RemovePartyInteractionAsync(rpToRemove);
             }
 
             // Atualiza a data de última modificação  
@@ -101,7 +101,7 @@ namespace Tmf683.PartyInteraction.Api.Services
         }
 
         //PUT/UPDATE
-        public async Task<bool> PutInteractionAsync(string id, PartyInteractionDto dto)
+        public async Task<bool> UpdatePartyInteractionAsync(string id, PartyInteractionDto dto)
         {
 
             // 1. Validar ID
@@ -113,7 +113,7 @@ namespace Tmf683.PartyInteraction.Api.Services
                 throw new ArgumentException($"Campos obrigatórios ausentes: {string.Join(", ", missingFields)}");
 
             // 3. Buscar entidade existente
-            var existing = await _repository.GetByIdAsync(id);
+            var existing = await _repository.GetPartyInteractionByIdAsync(id);
             if (existing == null)
                 throw new KeyNotFoundException("Interação não encontrada.");
 
@@ -122,7 +122,7 @@ namespace Tmf683.PartyInteraction.Api.Services
             updatedEntity.LastUpdateDate = DateTime.UtcNow;
 
             // 5. Persistir
-            await _repository.UpdateAsync(updatedEntity);
+            await _repository.UpdatePartyInteractionAsync(updatedEntity);
 
             return true;
 

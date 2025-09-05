@@ -8,12 +8,12 @@ namespace Tmf683.PartyInteraction.Api.Services.Interfaces
     {
         //MÉTODOS DE CRUD
         //PATCH
-        Task<IActionResult> PatchInteractionAsync(string id, PartyInteractionDto dto);
+        Task<IActionResult> PatchPartyInteractionAsync(string id, PartyInteractionDto dto);
         //GET ALL
         Task<IEnumerable<PartyInteractionDto>> GetAllPartyInteractionsAsync();
         //GET by ID
-        Task<PartyInteractionDto?> GetByIdAsync(string id);
+        Task<PartyInteractionDto?> GetPartyInteractionByIdAsync(string id);
         //UPDATE
-        Task<bool> PutInteractionAsync(string id, PartyInteractionDto dto);
+        Task<bool> UpdatePartyInteractionAsync(string id, PartyInteractionDto dto);
     }
 }

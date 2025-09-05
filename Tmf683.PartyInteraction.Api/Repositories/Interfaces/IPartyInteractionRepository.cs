@@ -1,4 +1,4 @@
-﻿using Tmf683.PartyInteraction.Api.Models;
+﻿using Tmf683.PartyInteraction.Api.Models.Entities;
 
 namespace Tmf683.PartyInteraction.Api.Repositories.Interfaces
 {
@@ -7,11 +7,11 @@ namespace Tmf683.PartyInteraction.Api.Repositories.Interfaces
         //GET All Interactions
         Task<IEnumerable<PartyInteract>> GetAllPartyInteractionsAsync();
         //GET by ID
-        Task<PartyInteract?> GetByIdAsync(string id);
+        Task<PartyInteract?> GetPartyInteractionByIdAsync(string id);
         //UPDATE
-        Task UpdateAsync(PartyInteract entity);
+        Task UpdatePartyInteractionAsync(PartyInteract entity);
 
-        Task RemoveAsync(RelatedPartyRef entity);
+        Task RemovePartyInteractionAsync(RelatedPartyRef entity);
         Task SaveChangesAsync();
     }
 

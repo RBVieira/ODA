@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Tmf683.PartyInteraction.Api.Models;
+using Tmf683.PartyInteraction.Api.Models.Entities;
 
 
 namespace Tmf683.PartyInteraction.Api.Data
