@@ -12,7 +12,7 @@ namespace Tmf683.PartyInteraction.Api.Services.Interfaces
         //GET ALL
         Task<IEnumerable<PartyInteractionDto>> GetAllPartyInteractionsAsync();
         //GET by ID
-        Task<PartyInteractionDto?> GetByIdAsync(string id)
+        Task<PartyInteractionDto?> GetByIdAsync(string id);
         //UPDATE
         Task<bool> PutInteractionAsync(string id, PartyInteractionDto dto);
     }

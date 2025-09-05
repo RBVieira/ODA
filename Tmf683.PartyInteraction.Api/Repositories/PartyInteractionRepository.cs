@@ -2,7 +2,7 @@
 using Tmf683.PartyInteraction.Api.Data;
 using Tmf683.PartyInteraction.Api.Models;
 using Tmf683.PartyInteraction.Api.Repositories.Interfaces;
-//new main
+
 namespace Tmf683.PartyInteraction.Api.Repositories
 {
     public class PartyInteractionRepository : IPartyInteractionRepository
