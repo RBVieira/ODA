@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tmf683.PartyInteraction.Api.Data;
-using Tmf683.PartyInteraction.Api.Models.Dtos;
+using Tmf683.PartyInteraction.Api.Models.Dtos.Responses;
+using Tmf683.PartyInteraction.Api.Models.Dtos.Requests;
 using AutoMapper;
 using System.Net.Http;
 using System.Net;
@@ -51,7 +52,7 @@ public class PartyInteractionController : ControllerBase
 
     //Consulta uma interação específica pelo seu ID
     [HttpGet("{id}")]
-    public async Task<ActionResult<PartyInteractionDto>> GetPartyInteractionsById(string id)
+    public async Task<ActionResult<PartyInteractionResponseDto>> GetPartyInteractionsById(string id)
     {
         var interaction = await _context.PartyInteractions.Include(pi => pi.RelatedParty).FirstOrDefaultAsync(pi => pi.Id == id);
 
@@ -60,13 +61,13 @@ public class PartyInteractionController : ControllerBase
             return NotFound();
         }
 
-        return Ok(_mapper.Map<PartyInteractionDto>(interaction));
+        return Ok(_mapper.Map<PartyInteractionResponseDto>(interaction));
     }
 
 
     // Operação de UPDATE (PATCH) em uma interação, seguindo o padrão TM Forum
     [HttpPatch("{id}")]
-    public async Task<IActionResult> UpdatePartyInteraction(string id, [FromBody] PartyInteractionDto dto)
+    public async Task<IActionResult> UpdatePartyInteraction(string id, [FromBody] PartyInteractionUpdateDto dto)
     {
         //chamada do serviço que implementa a lógica de patch
         return await _service.PatchPartyInteractionAsync(id, dto);
@@ -80,7 +81,7 @@ public class PartyInteractionController : ControllerBase
     //mas sim consulta a fonte oficial (TMF632) e armazena apenas a referência, criando uma nova interação associada a esse PartyId em seu banco de dados.
     //TO DO - Implementar o patter service/repository
     [HttpPost]
-    public async Task<IActionResult> CreatePartyInteraction([FromBody] PartyInteractionDto interactionDto)
+    public async Task<IActionResult> CreatePartyInteraction([FromBody] PartyInteractionCreateDto interactionDto)
     {
         // 1. Validação de dados de entrada
         if (!ModelState.IsValid)
@@ -99,14 +100,14 @@ public class PartyInteractionController : ControllerBase
         var client = _httpClientFactory.CreateClient("PartyManagementClient");
 
         // Define a URL base para o cliente HTTP usando a configuração injetada
-        var endpointUrl = $"{_tmf632Config.BaseUrl}{_tmf632Config.GetIndividualEndpoint}{relatedPartyRefDto.PartyId}";
+        var endpointUrl = $"{_tmf632Config.BaseUrl}{_tmf632Config.GetIndividualEndpoint}{relatedPartyRefDto.Id}";
 
         // Chama a API TMF632 para buscar os dados do PartyID
         var response = await client.GetAsync(endpointUrl);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
-            return NotFound($"PartyId '{relatedPartyRefDto.PartyId}' não encontrado na API TMF632.");
+            return NotFound($"PartyId '{relatedPartyRefDto.Id}' não encontrado na API TMF632.");
         }
 
         if (!response.IsSuccessStatusCode)
@@ -115,7 +116,7 @@ public class PartyInteractionController : ControllerBase
         }
 
         // 3. Conversão e persistência
-        var interaction = _mapper.Map<PartyInteract>(interactionDto);
+        var interaction = _mapper.Map<PartyInteraction>(interactionDto);
 
         // Define valores padrão para os campos
         interaction.Id = Guid.NewGuid().ToString();
@@ -132,8 +133,8 @@ public class PartyInteractionController : ControllerBase
         await _context.SaveChangesAsync();
 
         // 4. Retorno HTTP com o recurso criado
-        var createdInteractionDto = _mapper.Map<PartyInteractionDto>(interaction);
-        return CreatedAtAction(nameof(GetPartyInteractionsById), new { id = createdInteractionDto.Id }, createdInteractionDto);
+        var createdInteractionDto = _mapper.Map<PartyInteractionCreateDto>(interaction);
+        return CreatedAtAction(nameof(GetPartyInteractionsById), new { id = interaction.Id}, createdInteractionDto);
     }
 
 

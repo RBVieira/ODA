@@ -15,20 +15,20 @@ namespace Tmf683.PartyInteraction.Api.Repositories
         }
 
         //GET All Interactions
-        public async Task<IEnumerable<PartyInteract>> GetAllPartyInteractionsAsync()
+        public async Task<IEnumerable<Models.Entities.PartyInteraction>> GetAllPartyInteractionsAsync()
         {
             return await _context.PartyInteractions.Include(pi => pi.RelatedParty).ToListAsync();
         }
 
 
         //Busca uma interação de party pelo ID, incluindo a entidade RelatedParty
-        public async Task<PartyInteract?> GetPartyInteractionByIdAsync(string id)
+        public async Task<Models.Entities.PartyInteraction?> GetPartyInteractionByIdAsync(string id)
         {
             return await _context.PartyInteractions.Include(pi => pi.RelatedParty).FirstOrDefaultAsync(pi => pi.Id == id);
         }
 
         //UPDATE
-        public async Task UpdatePartyInteractionAsync(PartyInteract entity)
+        public async Task UpdatePartyInteractionAsync(Models.Entities.PartyInteraction entity)
         {
             _context.PartyInteractions.Update(entity);
             await _context.SaveChangesAsync();
@@ -36,9 +36,9 @@ namespace Tmf683.PartyInteraction.Api.Repositories
 
         //Remove as entradas em RelatedPartyRef que é uma lista dentro de PartyInteract
         //PartyInteract é o que registra a interação, RelatedPartyRef são todas as partes envolvidas na interação
-        public async Task RemovePartyInteractionAsync(RelatedPartyRef entity)
+        public async Task RemovePartyInteractionAsync(RelatedPartyOrPartyRole entity)
         {
-            _context.RelatedPartyRefs.Remove(entity);
+            _context.RelatedParties.Remove(entity);
             await _context.SaveChangesAsync();
 
         }

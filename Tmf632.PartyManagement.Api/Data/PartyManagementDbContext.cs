@@ -17,6 +17,12 @@ namespace Tmf632.PartyManagement.Api.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
+            // Define "ODA" como o schema padrão para todas as tabelas neste DbContext.
+            modelBuilder.HasDefaultSchema("ODA");
+
         }
+
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tmf683.PartyInteraction.Api.Data;
 
@@ -11,9 +12,11 @@ using Tmf683.PartyInteraction.Api.Data;
 namespace Tmf683.PartyInteraction.Api.Migrations
 {
     [DbContext(typeof(PartyInteractionDbContext))]
-    partial class PartyInteractionDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250908132141_InitialCreateWithOdaSchema")]
+    partial class InitialCreateWithOdaSchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

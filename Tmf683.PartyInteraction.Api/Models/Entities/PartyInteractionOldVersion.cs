@@ -2,7 +2,7 @@
 
 namespace Tmf683.PartyInteraction.Api.Models.Entities
 {
-    public class PartyInteract
+    public class PartyInteractionOldVersion
     {
 
         [Key]
@@ -12,10 +12,9 @@ namespace Tmf683.PartyInteraction.Api.Models.Entities
         public DateTime CreationDate { get; set; }
         public string Channel { get; set; }
         public string Status { get; set; }
-        public List<RelatedPartyRef> RelatedParty { get; set; } = new List<RelatedPartyRef>();
+        public List<RelatedPartyRefOLD> RelatedParty { get; set; } = new List<RelatedPartyRefOLD>();
 
         public DateTime LastUpdateDate { get; set; }
 
     }
 }
-

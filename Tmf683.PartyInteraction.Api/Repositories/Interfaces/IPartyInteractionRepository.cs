@@ -5,13 +5,13 @@ namespace Tmf683.PartyInteraction.Api.Repositories.Interfaces
     public interface IPartyInteractionRepository
     {
         //GET All Interactions
-        Task<IEnumerable<PartyInteract>> GetAllPartyInteractionsAsync();
+        Task<IEnumerable<Models.Entities.PartyInteraction>> GetAllPartyInteractionsAsync();
         //GET by ID
-        Task<PartyInteract?> GetPartyInteractionByIdAsync(string id);
+        Task<Models.Entities.PartyInteraction?> GetPartyInteractionByIdAsync(string id);
         //UPDATE
-        Task UpdatePartyInteractionAsync(PartyInteract entity);
+        Task UpdatePartyInteractionAsync(Models.Entities.PartyInteraction entity);
 
-        Task RemovePartyInteractionAsync(RelatedPartyRef entity);
+        Task RemovePartyInteractionAsync(RelatedPartyOrPartyRole entity);
         Task SaveChangesAsync();
     }
 

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Tmf683.PartyInteraction.Api.Models.Entities
 {
-    public class RelatedPartyRef
+    public class RelatedPartyRefOLD
     {
         [Key]
         [ValidateNever]

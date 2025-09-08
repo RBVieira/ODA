@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using Tmf683.PartyInteraction.Api.Models.Dtos;
+using Tmf683.PartyInteraction.Api.Models.Dtos.Requests;
+using Tmf683.PartyInteraction.Api.Models.Dtos.Responses;
 using Tmf683.PartyInteraction.Api.Services.Interfaces;
 using Tmf683.PartyInteraction.Api.Data;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using Tmf683.PartyInteraction.Api.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.VisualBasic;
 using Tmf683.PartyInteraction.Api.Models.Entities;
+using Tmf683.PartyInteraction.Api.Models.Dtos;
 
 namespace Tmf683.PartyInteraction.Api.Services
 {
@@ -27,26 +29,26 @@ namespace Tmf683.PartyInteraction.Api.Services
 
 
         //GET ALL Interactions
-        public async Task<IEnumerable<PartyInteractionDto>> GetAllPartyInteractionsAsync()
+        public async Task<IEnumerable<PartyInteractionResponseDto>> GetAllPartyInteractionsAsync()
         {
             var interactions = await _repository.GetAllPartyInteractionsAsync();
-            return _mapper.Map<IEnumerable<PartyInteractionDto>>(interactions);
+            return _mapper.Map<IEnumerable<PartyInteractionResponseDto>>(interactions);
         }
 
         //GET by ID
-        public async Task<PartyInteractionDto?> GetPartyInteractionByIdAsync(string id)
+        public async Task<PartyInteractionResponseDto?> GetPartyInteractionByIdAsync(string id)
         {
             var interaction = await _repository.GetPartyInteractionByIdAsync(id);
-            return _mapper.Map<PartyInteractionDto>(interaction);
+            return _mapper.Map<PartyInteractionResponseDto>(interaction);
         }
 
 
         //PATCH
-        public async Task<IActionResult> PatchPartyInteractionAsync(string id, PartyInteractionDto dto)
+        public async Task<IActionResult> PatchPartyInteractionAsync(string id, PartyInteractionUpdateDto dto)
         {
-            //Na operação de PATCH o ID no corpo é opcional, mas se fornecido deve corresponder ao ID na URL  
-            if (!string.IsNullOrEmpty(dto.Id) && id != dto.Id)
-                return new BadRequestObjectResult("O ID na URL deve corresponder ao ID no corpo, se fornecido.");
+            //Na operação de PATCH o ID não deve vir no corpo e sim na URL  
+            if (!string.IsNullOrEmpty(id))
+                return new BadRequestObjectResult("O ID na URL deve ser fornecido.");
 
             //Busca a interação existente no banco de dados mas utiliza o método GetPartyInteractionByIdAsync do repositório
             var existing = await _repository.GetPartyInteractionByIdAsync(id);
@@ -57,36 +59,26 @@ namespace Tmf683.PartyInteraction.Api.Services
             //Aplica os patches nos campos fornecidos no DTO  
             ApplyPatch(existing.Description, dto.Description, val => existing.Description = val);
             ApplyPatch(existing.Status, dto.Status, val => existing.Status = val);
-            ApplyPatch(existing.Channel, dto.Channel, val => existing.Channel = val);
+            //ApplyPatch(existing.RelatedChannel, dto.RelatedChannel, val => existing.RelatedChannel = val);
 
             // Atualiza ou adiciona RelatedParty conforme fornecido no DTO dentro da entidade PartyInteract  
-            foreach (var relatedPartyDto in dto.RelatedParty ?? Enumerable.Empty<RelatedPartyRefDto>())
+            foreach (var relatedPartyDto in dto.RelatedParty ?? Enumerable.Empty<RelatedPartyOrPartyRoleDto>())
             {
+
                 var existingRelatedParty = existing.RelatedParty.FirstOrDefault(rp => rp.Id == relatedPartyDto.Id);
+
                 if (existingRelatedParty != null)
                 {
                     ApplyPatch(existingRelatedParty.Role, relatedPartyDto.Role, val => existingRelatedParty.Role = val);
-                    ApplyPatch(existingRelatedParty.PartyId, relatedPartyDto.PartyId, val => existingRelatedParty.PartyId = val);
+                    ApplyPatch(existingRelatedParty.Id, relatedPartyDto.Id, val => existingRelatedParty.Id = val);
                 }
                 else
                 {
-                    var newRp = _mapper.Map<RelatedPartyRef>(relatedPartyDto);
-                    existing.RelatedParty.Add(newRp);
+                    var newRp = _mapper.Map<RelatedPartyOrPartyRole>(relatedPartyDto);
                 }
             }
 
-            // Remoção explícita de RelatedParty. Se na chamada da API PATCH vier uma lista de IDs para remoção, processa essa remoção.  
-            //Aqui vamos interar os RelatedParty mas se for null no DTO, vamos considerar uma lista vazia para evitar erros de null reference que lançam exceção  
-            //?? se lado esquerdo é null usa uma lista vazia  
-            foreach (var idToRemove in dto.RelatedPartyToRemove ?? Enumerable.Empty<string>())
-            {
-                var rpToRemove = existing.RelatedParty.FirstOrDefault(rp => rp.Id == idToRemove);
-                if (rpToRemove == null)
-                    return new BadRequestObjectResult($"O RelatedParty com ID '{idToRemove}' não pertence à interação.");
 
-                // Remove da coleção na entidade PartyInteract utilizando o método RemovePartyInteractionAsync do repositório
-                _repository.RemovePartyInteractionAsync(rpToRemove);
-            }
 
             // Atualiza a data de última modificação  
             existing.LastUpdateDate = DateTime.UtcNow;
@@ -101,12 +93,12 @@ namespace Tmf683.PartyInteraction.Api.Services
         }
 
         //PUT/UPDATE
-        public async Task<bool> UpdatePartyInteractionAsync(string id, PartyInteractionDto dto)
+        public async Task<bool> UpdatePartyInteractionAsync(string id, PartyInteractionUpdateDto dto)
         {
 
             // 1. Validar ID
-            if (string.IsNullOrWhiteSpace(id) || dto.Id != id)
-                throw new ArgumentException("O ID da URL deve corresponder ao ID do corpo.");
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentException("O ID da URL deve ser informado.");
 
             // 2. Validar campos obrigatórios
             if (!IsComplete(dto, out var missingFields))
@@ -118,7 +110,7 @@ namespace Tmf683.PartyInteraction.Api.Services
                 throw new KeyNotFoundException("Interação não encontrada.");
 
             // 4. Mapear DTO para entidade
-            var updatedEntity = _mapper.Map<PartyInteract>(dto);
+            var updatedEntity = _mapper.Map<Models.Entities.PartyInteraction>(dto);
             updatedEntity.LastUpdateDate = DateTime.UtcNow;
 
             // 5. Persistir
@@ -150,12 +142,12 @@ namespace Tmf683.PartyInteraction.Api.Services
         }
 
         //Método para validar se todos os campos obrigatórios estão presentes no DTO para a operação de PUT
-        private bool IsComplete(PartyInteractionDto dto, out List<string> missingFields)
+        private bool IsComplete(PartyInteractionUpdateDto dto, out List<string> missingFields)
         {
             missingFields = new();
 
             if (string.IsNullOrWhiteSpace(dto.Status)) missingFields.Add("Status");
-            if (string.IsNullOrWhiteSpace(dto.Channel)) missingFields.Add("Channel");
+            //if (string.IsNullOrWhiteSpace(dto.Channel)) missingFields.Add("Channel");
             if (string.IsNullOrWhiteSpace(dto.Description)) missingFields.Add("Description");
             if (dto.RelatedParty == null || !dto.RelatedParty.Any()) missingFields.Add("RelatedParty");
 

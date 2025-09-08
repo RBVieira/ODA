@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Tmf683.PartyInteraction.Api.Models;
-using Tmf683.PartyInteraction.Api.Models.Dtos;
+using Tmf683.PartyInteraction.Api.Models.Dtos.Requests;
+using Tmf683.PartyInteraction.Api.Models.Dtos.Responses;
 
 namespace Tmf683.PartyInteraction.Api.Services.Interfaces
 {
@@ -8,12 +9,12 @@ namespace Tmf683.PartyInteraction.Api.Services.Interfaces
     {
         //MÉTODOS DE CRUD
         //PATCH
-        Task<IActionResult> PatchPartyInteractionAsync(string id, PartyInteractionDto dto);
+        Task<IActionResult> PatchPartyInteractionAsync(string id, PartyInteractionUpdateDto dto);
         //GET ALL
-        Task<IEnumerable<PartyInteractionDto>> GetAllPartyInteractionsAsync();
+        Task<IEnumerable<PartyInteractionResponseDto>> GetAllPartyInteractionsAsync();
         //GET by ID
-        Task<PartyInteractionDto?> GetPartyInteractionByIdAsync(string id);
+        Task<PartyInteractionResponseDto?> GetPartyInteractionByIdAsync(string id);
         //UPDATE
-        Task<bool> UpdatePartyInteractionAsync(string id, PartyInteractionDto dto);
+        Task<bool> UpdatePartyInteractionAsync(string id, PartyInteractionUpdateDto dto);
     }
 }
