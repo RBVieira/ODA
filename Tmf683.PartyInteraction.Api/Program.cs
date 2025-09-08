@@ -5,8 +5,8 @@ using Tmf683.PartyInteraction.Application.Mappings;
 using Tmf683.PartyInteraction.Application.Models.APIs;
 using Tmf683.PartyInteraction.Application.Services.Interfaces;
 using Tmf683.PartyInteraction.Application.Services;
-using Tmf683.PartyInteraction.Application.Repositories;
-using Tmf683.PartyInteraction.Application.Repositories.Interfaces;
+using Tmf683.PartyInteraction.Application;
+using Tmf683.PartyInteraction.Infrastructure;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,11 +18,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//Meus serviços
+
+// --- CONFIGURAÇÃO CORRETA DO DBCONTEXT ---
 builder.Services.AddDbContext<PartyInteractionDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        // INFORMA AO EF ONDE ENCONTRAR AS MIGRAÇÕES
         b => b.MigrationsAssembly("Tmf683.PartyInteraction.Infrastructure")
     )
 );
@@ -38,18 +38,16 @@ builder.Services.AddDbContext<PartyInteractionDbContext>(options => options.UseS
 builder.Services.Configure<Tmf632ApiConfiguration>(builder.Configuration.GetSection("ApiClients:Tmf632"));
 
 // Adicionar o HttpClient para fazer chamadas HTTP para a API TMF632 por exemplo
+// Adicionar o HttpClient
 builder.Services.AddHttpClient("PartyManagementClient", client =>
 {
-    // A URL base será injetada mais tarde no Controller
     client.DefaultRequestHeaders.Accept.Clear();
     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 });
 
-// Injetar o serviço de PartyInteraction
+// --- INJEÇÃO DE DEPENDÊNCIA ---
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IPartyInteractionService, PartyInteractionService>();
-
-//Repository
-builder.Services.AddScoped<IPartyInteractionRepository, PartyInteractionRepository>();
 
 // Adicionar o AutoMapper
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<AutoMapperProfile>());

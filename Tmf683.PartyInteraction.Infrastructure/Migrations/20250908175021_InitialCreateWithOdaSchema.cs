@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
+namespace Tmf683.PartyInteraction.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreateWithOdaSchema : Migration

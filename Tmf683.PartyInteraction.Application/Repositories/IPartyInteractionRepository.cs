@@ -13,7 +13,9 @@ namespace Tmf683.PartyInteraction.Application.Repositories
         Task UpdatePartyInteractionAsync(Domain.Entities.PartyInteraction entity);
 
         Task RemovePartyInteractionAsync(RelatedPartyOrPartyRole entity);
+
         Task SaveChangesAsync();
+
     }
 
 

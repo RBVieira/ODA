@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Tmf683.PartyInteraction.Api.Data;
+using Tmf683.PartyInteraction.Infrastructure.Data;
 
 #nullable disable
 
-namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
+namespace Tmf683.PartyInteraction.Infrastructure.Migrations
 {
     [DbContext(typeof(PartyInteractionDbContext))]
     partial class PartyInteractionDbContextModelSnapshot : ModelSnapshot
@@ -23,7 +23,7 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.AttachmentRefOrValue", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.AttachmentRefOrValue", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -87,7 +87,7 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
                     b.ToTable("Attachments", "ODA");
                 });
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.ExternalIdentifier", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.ExternalIdentifier", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -124,7 +124,7 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
                     b.ToTable("ExternalIdentifiers", "ODA");
                 });
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.InteractionItem", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.InteractionItem", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -164,7 +164,7 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
                     b.ToTable("InteractionItems", "ODA");
                 });
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.InteractionRelationship", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.InteractionRelationship", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -208,7 +208,7 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
                     b.ToTable("InteractionRelationships", "ODA");
                 });
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.Note", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.Note", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -249,7 +249,7 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
                     b.ToTable("Notes", "ODA");
                 });
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.PartyInteraction", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.PartyInteraction", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -295,7 +295,7 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
                     b.ToTable("PartyInteractions", "ODA");
                 });
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.RelatedChannel", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.RelatedChannel", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -336,7 +336,7 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
                     b.ToTable("RelatedChannels", "ODA");
                 });
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.RelatedPartyOrPartyRole", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.RelatedPartyOrPartyRole", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -382,13 +382,13 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
                     b.ToTable("RelatedParties", "ODA");
                 });
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.AttachmentRefOrValue", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.AttachmentRefOrValue", b =>
                 {
-                    b.HasOne("Tmf683.PartyInteraction.Api.Models.Entities.InteractionItem", "InteractionItem")
+                    b.HasOne("Tmf683.PartyInteraction.Domain.Entities.InteractionItem", "InteractionItem")
                         .WithMany("Attachment")
                         .HasForeignKey("InteractionItemId");
 
-                    b.HasOne("Tmf683.PartyInteraction.Api.Models.Entities.PartyInteraction", "PartyInteraction")
+                    b.HasOne("Tmf683.PartyInteraction.Domain.Entities.PartyInteraction", "PartyInteraction")
                         .WithMany("Attachment")
                         .HasForeignKey("PartyInteractionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -399,9 +399,9 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
                     b.Navigation("PartyInteraction");
                 });
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.ExternalIdentifier", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.ExternalIdentifier", b =>
                 {
-                    b.HasOne("Tmf683.PartyInteraction.Api.Models.Entities.PartyInteraction", "PartyInteraction")
+                    b.HasOne("Tmf683.PartyInteraction.Domain.Entities.PartyInteraction", "PartyInteraction")
                         .WithMany("ExternalIdentifier")
                         .HasForeignKey("PartyInteractionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -410,9 +410,9 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
                     b.Navigation("PartyInteraction");
                 });
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.InteractionItem", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.InteractionItem", b =>
                 {
-                    b.HasOne("Tmf683.PartyInteraction.Api.Models.Entities.PartyInteraction", "PartyInteraction")
+                    b.HasOne("Tmf683.PartyInteraction.Domain.Entities.PartyInteraction", "PartyInteraction")
                         .WithMany("InteractionItem")
                         .HasForeignKey("PartyInteractionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -421,9 +421,9 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
                     b.Navigation("PartyInteraction");
                 });
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.InteractionRelationship", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.InteractionRelationship", b =>
                 {
-                    b.HasOne("Tmf683.PartyInteraction.Api.Models.Entities.PartyInteraction", "PartyInteraction")
+                    b.HasOne("Tmf683.PartyInteraction.Domain.Entities.PartyInteraction", "PartyInteraction")
                         .WithMany("InteractionRelationship")
                         .HasForeignKey("PartyInteractionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -432,13 +432,13 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
                     b.Navigation("PartyInteraction");
                 });
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.Note", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.Note", b =>
                 {
-                    b.HasOne("Tmf683.PartyInteraction.Api.Models.Entities.InteractionItem", "InteractionItem")
+                    b.HasOne("Tmf683.PartyInteraction.Domain.Entities.InteractionItem", "InteractionItem")
                         .WithMany("Note")
                         .HasForeignKey("InteractionItemId");
 
-                    b.HasOne("Tmf683.PartyInteraction.Api.Models.Entities.PartyInteraction", "PartyInteraction")
+                    b.HasOne("Tmf683.PartyInteraction.Domain.Entities.PartyInteraction", "PartyInteraction")
                         .WithMany("Note")
                         .HasForeignKey("PartyInteractionId");
 
@@ -447,9 +447,9 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
                     b.Navigation("PartyInteraction");
                 });
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.RelatedChannel", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.RelatedChannel", b =>
                 {
-                    b.HasOne("Tmf683.PartyInteraction.Api.Models.Entities.PartyInteraction", "PartyInteraction")
+                    b.HasOne("Tmf683.PartyInteraction.Domain.Entities.PartyInteraction", "PartyInteraction")
                         .WithMany("RelatedChannel")
                         .HasForeignKey("PartyInteractionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -458,13 +458,13 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
                     b.Navigation("PartyInteraction");
                 });
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.RelatedPartyOrPartyRole", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.RelatedPartyOrPartyRole", b =>
                 {
-                    b.HasOne("Tmf683.PartyInteraction.Api.Models.Entities.InteractionItem", "InteractionItem")
+                    b.HasOne("Tmf683.PartyInteraction.Domain.Entities.InteractionItem", "InteractionItem")
                         .WithMany("RelatedParty")
                         .HasForeignKey("InteractionItemId");
 
-                    b.HasOne("Tmf683.PartyInteraction.Api.Models.Entities.PartyInteraction", "PartyInteraction")
+                    b.HasOne("Tmf683.PartyInteraction.Domain.Entities.PartyInteraction", "PartyInteraction")
                         .WithMany("RelatedParty")
                         .HasForeignKey("PartyInteractionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -475,7 +475,7 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
                     b.Navigation("PartyInteraction");
                 });
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.InteractionItem", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.InteractionItem", b =>
                 {
                     b.Navigation("Attachment");
 
@@ -484,7 +484,7 @@ namespace Tmf683.PartyInteraction.Infrastructure.Data.Migrations
                     b.Navigation("RelatedParty");
                 });
 
-            modelBuilder.Entity("Tmf683.PartyInteraction.Api.Models.Entities.PartyInteraction", b =>
+            modelBuilder.Entity("Tmf683.PartyInteraction.Domain.Entities.PartyInteraction", b =>
                 {
                     b.Navigation("Attachment");
 
