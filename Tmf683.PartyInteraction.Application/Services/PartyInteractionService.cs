@@ -1,157 +1,111 @@
 ﻿using AutoMapper;
-using System.ComponentModel.DataAnnotations;
+using Microsoft.Extensions.Options;
+using System.Net;
+using Tmf683.PartyInteraction.Application.Models.APIs;
 using Tmf683.PartyInteraction.Application.Models.Dtos.Requests;
 using Tmf683.PartyInteraction.Application.Models.Dtos.Responses;
 using Tmf683.PartyInteraction.Application.Services.Interfaces;
 
-using Tmf683.PartyInteraction.Application.Models.Dtos;
-using Microsoft.AspNetCore.Mvc;
-using Tmf683.PartyInteraction.Domain.Entities;
-using Tmf683.PartyInteraction.Application.Repositories;
+
 
 namespace Tmf683.PartyInteraction.Application.Services
 {
     public class PartyInteractionService : IPartyInteractionService
+
     {
-        #region SETTINGS da Classe
-        private readonly IPartyInteractionRepository _repository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly Tmf632ApiConfiguration _tmf632Config;
 
-        public PartyInteractionService(IPartyInteractionRepository repository, IMapper mapper)
+        public PartyInteractionService(
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            IHttpClientFactory httpClientFactory,
+            IOptions<Tmf632ApiConfiguration> tmf632Config)
         {
-            _repository = repository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _httpClientFactory = httpClientFactory;
+            _tmf632Config = tmf632Config.Value;
         }
-        #endregion
 
-
-        //GET ALL Interactions
-        public async Task<IEnumerable<PartyInteractionResponseDto>> GetAllPartyInteractionsAsync()
+        public async Task<IEnumerable<PartyInteractionResponseDto>> GetAllAsync()
         {
-            var interactions = await _repository.GetAllPartyInteractionsAsync();
+            var interactions = await _unitOfWork.PartyInteractions.GetAllAsync();
             return _mapper.Map<IEnumerable<PartyInteractionResponseDto>>(interactions);
         }
 
-        //GET by ID
-        public async Task<PartyInteractionResponseDto?> GetPartyInteractionByIdAsync(string id)
+        public async Task<PartyInteractionResponseDto?> GetByIdAsync(string id)
         {
-            var interaction = await _repository.GetPartyInteractionByIdAsync(id);
+            var interaction = await _unitOfWork.PartyInteractions.GetByIdAsync(id);
             return _mapper.Map<PartyInteractionResponseDto>(interaction);
         }
 
-
-        //PATCH
-        public async Task<IActionResult> PatchPartyInteractionAsync(string id, PartyInteractionUpdateDto dto)
+        public async Task<(Domain.Entities.PartyInteraction? CreatedInteraction, string? ErrorMessage)> CreateAsync(PartyInteractionCreateDto createDto)
         {
-            //Na operação de PATCH o ID não deve vir no corpo e sim na URL  
-            if (!string.IsNullOrEmpty(id))
-                return new BadRequestObjectResult("O ID na URL deve ser fornecido.");
-
-            //Busca a interação existente no banco de dados mas utiliza o método GetPartyInteractionByIdAsync do repositório
-            var existing = await _repository.GetPartyInteractionByIdAsync(id);
-
-            if (existing == null)
-                return new NotFoundResult();
-
-            //Aplica os patches nos campos fornecidos no DTO  
-            ApplyPatch(existing.Description, dto.Description, val => existing.Description = val);
-            ApplyPatch(existing.Status, dto.Status, val => existing.Status = val);
-            //ApplyPatch(existing.RelatedChannel, dto.RelatedChannel, val => existing.RelatedChannel = val);
-
-            // Atualiza ou adiciona RelatedParty conforme fornecido no DTO dentro da entidade PartyInteract  
-            foreach (var relatedPartyDto in dto.RelatedParty ?? Enumerable.Empty<RelatedPartyOrPartyRoleDto>())
+            // 1. Orquestração: Validar se as Partes Relacionadas existem na API TMF632
+            var client = _httpClientFactory.CreateClient("PartyManagementClient");
+            foreach (var partyRefDto in createDto.RelatedParty)
             {
-
-                var existingRelatedParty = existing.RelatedParty.FirstOrDefault(rp => rp.Id == relatedPartyDto.Id);
-
-                if (existingRelatedParty != null)
+                var endpointUrl = $"{_tmf632Config.BaseUrl}{_tmf632Config.GetIndividualEndpoint}{partyRefDto.Id}";
+                var response = await client.GetAsync(endpointUrl);
+                if (response.StatusCode == HttpStatusCode.NotFound)
                 {
-                    ApplyPatch(existingRelatedParty.Role, relatedPartyDto.Role, val => existingRelatedParty.Role = val);
-                    ApplyPatch(existingRelatedParty.Id, relatedPartyDto.Id, val => existingRelatedParty.Id = val);
-                }
-                else
-                {
-                    var newRp = _mapper.Map<RelatedPartyOrPartyRole>(relatedPartyDto);
+                    return (null, $"PartyId '{partyRefDto.Id}' não encontrado na API externa.");
                 }
             }
 
+            // 2. Mapeamento e Lógica de Negócio
+            var newInteraction = _mapper.Map<Domain.Entities.PartyInteraction>(createDto);
 
+            newInteraction.Id = Guid.NewGuid().ToString(); // Gerado pelo servidor
+            newInteraction.CreationDate = DateTime.UtcNow;
+            newInteraction.LastUpdateDate = DateTime.UtcNow;
+            newInteraction.Status = "open"; // Status inicial padrão
+            newInteraction.BaseType = "PartyInteraction";
+            newInteraction.Type = "PartyInteraction"; // Pode ser mais específico se necessário
 
-            // Atualiza a data de última modificação  
-            existing.LastUpdateDate = DateTime.UtcNow;
+            // 3. Persistência via Unit of Work
+            await _unitOfWork.PartyInteractions.CreateAsync(newInteraction);
+            await _unitOfWork.CompleteAsync();
 
-            // Valida o modelo atualizado antes de salvar  
-            if (!TryValidateModel(existing))
-                return new BadRequestObjectResult(new ValidationProblemDetails());
-
-            // Salva as alterações no banco de dados  
-            await _repository.SaveChangesAsync();
-            return new NoContentResult();
+            return (newInteraction, null);
         }
 
-        //PUT/UPDATE
-        public async Task<bool> UpdatePartyInteractionAsync(string id, PartyInteractionUpdateDto dto)
+        public async Task<(Domain.Entities.PartyInteraction? UpdatedInteraction, string? ErrorMessage)> UpdateAsync(string id, PartyInteractionUpdateDto updateDto)
         {
+            var existingInteraction = await _unitOfWork.PartyInteractions.GetByIdAsync(id);
 
-            // 1. Validar ID
-            if (string.IsNullOrWhiteSpace(id))
-                throw new ArgumentException("O ID da URL deve ser informado.");
+            if (existingInteraction == null)
+            {
+                return (null, "Interação não encontrada.");
+            }
 
-            // 2. Validar campos obrigatórios
-            if (!IsComplete(dto, out var missingFields))
-                throw new ArgumentException($"Campos obrigatórios ausentes: {string.Join(", ", missingFields)}");
+            // O AutoMapper aplicará apenas as propriedades não nulas do DTO
+            _mapper.Map(updateDto, existingInteraction);
+            existingInteraction.LastUpdateDate = DateTime.UtcNow;
 
-            // 3. Buscar entidade existente
-            var existing = await _repository.GetPartyInteractionByIdAsync(id);
-            if (existing == null)
-                throw new KeyNotFoundException("Interação não encontrada.");
+            _unitOfWork.PartyInteractions.Update(existingInteraction);
 
-            // 4. Mapear DTO para entidade
-            var updatedEntity = _mapper.Map<Domain.Entities.PartyInteraction>(dto);
-            updatedEntity.LastUpdateDate = DateTime.UtcNow;
+            await _unitOfWork.CompleteAsync();
 
-            // 5. Persistir
-            await _repository.UpdatePartyInteractionAsync(updatedEntity);
-
-            return true;
-
+            return (existingInteraction, null);
         }
 
-
-
-
-        #region Métodos Auxiliares
-        //Método genérico para fazer substituição de valores somente nos campos onde realmente ocorreram alterações
-        private void ApplyPatch<T>(T currentValue, T newValue, Action<T> setter, Func<T, T, bool> comparer = null)
+        public async Task<(bool Success, string? ErrorMessage)> DeleteAsync(string id)
         {
-            if (newValue != null && !(comparer?.Invoke(currentValue, newValue) ?? newValue.Equals(currentValue)))
-                setter(newValue);
+            var interactionToDelete = await _unitOfWork.PartyInteractions.GetByIdAsync(id);
+
+            if (interactionToDelete == null)
+            {
+                return (false, "Interação não encontrada.");
+            }
+
+            _unitOfWork.PartyInteractions.Delete(interactionToDelete);
+            await _unitOfWork.CompleteAsync();
+
+            return (true, null);
         }
-
-
-        //Método para validar o modelo depois de feitas todas as alterações de inserções e deletes na estrutura da entidade
-        //valida os dados contra a estrutura de dados definada no modelo das entidades
-        private bool TryValidateModel(object model)
-        {
-            var validationContext = new ValidationContext(model);
-            var results = new List<ValidationResult>();
-            return Validator.TryValidateObject(model, validationContext, results, true);
-        }
-
-        //Método para validar se todos os campos obrigatórios estão presentes no DTO para a operação de PUT
-        private bool IsComplete(PartyInteractionUpdateDto dto, out List<string> missingFields)
-        {
-            missingFields = new();
-
-            if (string.IsNullOrWhiteSpace(dto.Status)) missingFields.Add("Status");
-            //if (string.IsNullOrWhiteSpace(dto.Channel)) missingFields.Add("Channel");
-            if (string.IsNullOrWhiteSpace(dto.Description)) missingFields.Add("Description");
-            if (dto.RelatedParty == null || !dto.RelatedParty.Any()) missingFields.Add("RelatedParty");
-
-            return !missingFields.Any();
-        }
-
-
-        #endregion
     }
 }

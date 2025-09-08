@@ -14,42 +14,44 @@ namespace Tmf683.PartyInteraction.Infrastructure.Repositories
             _context = context;
         }
 
-        //GET All Interactions
-        public async Task<IEnumerable<Domain.Entities.PartyInteraction>> GetAllPartyInteractionsAsync()
+        public async Task<Domain.Entities.PartyInteraction?> GetByIdAsync(string id)
         {
-            return await _context.PartyInteractions.Include(pi => pi.RelatedParty).ToListAsync();
+            // Carrega o agregado completo com todas as suas entidades filhas
+            return await _context.PartyInteractions
+                .Include(p => p.RelatedParty)
+                .Include(p => p.Note)
+                .Include(p => p.InteractionItem)
+                .Include(p => p.Attachment)
+                .Include(p => p.ExternalIdentifier)
+                .Include(p => p.InteractionRelationship)
+                .Include(p => p.RelatedChannel)
+                .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-
-        //Busca uma interação de party pelo ID, incluindo a entidade RelatedParty
-        public async Task<Domain.Entities.PartyInteraction?> GetPartyInteractionByIdAsync(string id)
+        public async Task<IEnumerable<Domain.Entities.PartyInteraction>> GetAllAsync()
         {
-            return await _context.PartyInteractions.Include(pi => pi.RelatedParty).FirstOrDefaultAsync(pi => pi.Id == id);
+            // Para listagens, podemos otimizar e não carregar todos os detalhes,
+            // mas para manter a consistência inicial, carregamos as partes relacionadas.
+            return await _context.PartyInteractions
+                .Include(p => p.RelatedParty)
+                .AsNoTracking() // Boa prática para consultas de leitura, melhora o desempenho.
+                .ToListAsync();
         }
 
-        //UPDATE
-        public async Task UpdatePartyInteractionAsync(Domain.Entities.PartyInteraction entity)
+        public async Task CreateAsync(Domain.Entities.PartyInteraction interaction)
         {
-            _context.PartyInteractions.Update(entity);
-            await _context.SaveChangesAsync();
+            await _context.PartyInteractions.AddAsync(interaction);
         }
 
-        //Remove as entradas em RelatedPartyRef que é uma lista dentro de PartyInteract
-        //PartyInteract é o que registra a interação, RelatedPartyRef são todas as partes envolvidas na interação
-        public async Task RemovePartyInteractionAsync(RelatedPartyOrPartyRole entity)
+        public void Update(Domain.Entities.PartyInteraction interaction)
         {
-            _context.RelatedParties.Remove(entity);
-            await _context.SaveChangesAsync();
-
+            // Apenas informa ao EF Core que a entidade inteira foi modificada.
+            _context.PartyInteractions.Update(interaction);
         }
 
-        //Apenas para salvar as modificações
-        public async Task SaveChangesAsync()
+        public void Delete(Domain.Entities.PartyInteraction interaction)
         {
-            await _context.SaveChangesAsync();
+            _context.PartyInteractions.Remove(interaction);
         }
-
-
     }
-
 }

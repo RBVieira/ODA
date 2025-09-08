@@ -1,146 +1,120 @@
 ﻿using AutoMapper;
-using System.Net;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Tmf683.PartyInteraction.Application.Common;
 using Tmf683.PartyInteraction.Application.Models.Dtos.Requests;
 using Tmf683.PartyInteraction.Application.Models.Dtos.Responses;
-using Tmf683.PartyInteraction.Application.Models.APIs;
 using Tmf683.PartyInteraction.Application.Services.Interfaces;
-using Tmf683.PartyInteraction.Domain.Entities;
-using Microsoft.Extensions.Options;
-using Tmf683.PartyInteraction.Infrastructure.Data;
 
-
-
-
-[ApiController]
-[Route("api/[controller]")]
-public class PartyInteractionController : ControllerBase
+namespace Tmf683.PartyInteraction.Api.Controllers
 {
-    private readonly PartyInteractionDbContext _context; //Utiliza o DB Context direto mas paulatinamente será substituído pelo _service
-    private readonly IMapper _mapper;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly Tmf632ApiConfiguration _tmf632Config; // Configuração da API TMF632
-    private readonly IPartyInteractionService _service; //service de acesso aos dados
-
-
-
-    public PartyInteractionController(
-        PartyInteractionDbContext context,
-        IMapper mapper, 
-        IHttpClientFactory httpClientFactory, //Cliente HTTP para chamadas externas
-        IOptions<Tmf632ApiConfiguration> tmf632Config, // injeção de configuração dos dados da API TMF632
-        IPartyInteractionService service) 
+    [ApiController]
+    [Route("api/tmf683/partyInteraction")]
+    [Produces("application/json")]
+    public class PartyInteractionController : ControllerBase
     {
-        _context = context;
-        _mapper = mapper;
-        _httpClientFactory = httpClientFactory;
-        _tmf632Config = tmf632Config.Value;
-        _service = service;
+        private readonly IPartyInteractionService _service;
+        private readonly IMapper _mapper;
 
-    }
-
-
-    //Traz a relação de todas as interações do cliente ou organização
-    [HttpGet]
-    public async Task<IActionResult> GetAllPartyInteractions()
-    {
-        var result = await _service.GetAllPartyInteractionsAsync();
-        return Ok(result);
-    }
-
-    //Consulta uma interação específica pelo seu ID
-    [HttpGet("{id}")]
-    public async Task<ActionResult<PartyInteractionResponseDto>> GetPartyInteractionsById(string id)
-    {
-        var interaction = await _context.PartyInteractions.Include(pi => pi.RelatedParty).FirstOrDefaultAsync(pi => pi.Id == id);
-
-        if (interaction == null)
+        public PartyInteractionController(IPartyInteractionService service, IMapper mapper)
         {
-            return NotFound();
+            _service = service;
+            _mapper = mapper;
         }
 
-        return Ok(_mapper.Map<PartyInteractionResponseDto>(interaction));
-    }
-
-
-    // Operação de UPDATE (PATCH) em uma interação, seguindo o padrão TM Forum
-    [HttpPatch("{id}")]
-    public async Task<IActionResult> UpdatePartyInteraction(string id, [FromBody] PartyInteractionUpdateDto dto)
-    {
-        //chamada do serviço que implementa a lógica de patch
-        return await _service.PatchPartyInteractionAsync(id, dto);
-
-    }
-
-
-
-    //Este POST é para criar uma nova interação para um cliente ou organização, o cliente ou organização deve existir na API TMF632
-    //A API TMF683 Party Interaction atua como um orquestrador. Ela não armazena dados de Individual ou Organization em seu próprio banco de dados,
-    //mas sim consulta a fonte oficial (TMF632) e armazena apenas a referência, criando uma nova interação associada a esse PartyId em seu banco de dados.
-    //TO DO - Implementar o patter service/repository
-    [HttpPost]
-    public async Task<IActionResult> CreatePartyInteraction([FromBody] PartyInteractionCreateDto interactionDto)
-    {
-        // 1. Validação de dados de entrada
-        if (!ModelState.IsValid)
+        /// <summary>
+        /// Cria uma nova Party Interaction.
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(typeof(ApiResponse<PartyInteractionResponseDto>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Create([FromBody] PartyInteractionCreateDto createDto)
         {
-            return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ApiResponse<object>.Fail(ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()));
+            }
+
+            var (createdInteraction, errorMessage) = await _service.CreateAsync(createDto);
+
+            if (errorMessage != null)
+            {
+                // Erros de negócio, como PartyId não encontrado, retornam BadRequest.
+                return BadRequest(ApiResponse<object>.Fail(errorMessage));
+            }
+
+            var responseDto = _mapper.Map<PartyInteractionResponseDto>(createdInteraction);
+            return CreatedAtAction(nameof(GetById),
+                                   new { id = responseDto.Id },
+                                   ApiResponse<PartyInteractionResponseDto>.Success(responseDto, StatusCodes.Status201Created));
         }
 
-        // 2. Orquestração: Valida se o PartyId existe na API no POST recebido
-        var relatedPartyRefDto = interactionDto.RelatedParty.FirstOrDefault();
-        if (relatedPartyRefDto == null)
+        /// <summary>
+        /// Lista todas as Party Interactions.
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<PartyInteractionResponseDto>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAll()
         {
-            return BadRequest("A Party Interaction deve ter pelo menos um Related Party.");
+            var interactions = await _service.GetAllAsync();
+            return Ok(ApiResponse<IEnumerable<PartyInteractionResponseDto>>.Success(interactions));
         }
 
-        //Cria o cliente HTTP para chamar a API TMF632
-        var client = _httpClientFactory.CreateClient("PartyManagementClient");
-
-        // Define a URL base para o cliente HTTP usando a configuração injetada
-        var endpointUrl = $"{_tmf632Config.BaseUrl}{_tmf632Config.GetIndividualEndpoint}{relatedPartyRefDto.Id}";
-
-        // Chama a API TMF632 para buscar os dados do PartyID
-        var response = await client.GetAsync(endpointUrl);
-
-        if (response.StatusCode == HttpStatusCode.NotFound)
+        /// <summary>
+        /// Busca uma Party Interaction específica pelo seu ID.
+        /// </summary>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(ApiResponse<PartyInteractionResponseDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetById(string id)
         {
-            return NotFound($"PartyId '{relatedPartyRefDto.Id}' não encontrado na API TMF632.");
+            var interactionDto = await _service.GetByIdAsync(id);
+
+            if (interactionDto == null)
+            {
+                return NotFound(ApiResponse<object>.Fail($"Interaction with ID '{id}' not found.", StatusCodes.Status404NotFound));
+            }
+
+            return Ok(ApiResponse<PartyInteractionResponseDto>.Success(interactionDto));
         }
 
-        if (!response.IsSuccessStatusCode)
+        /// <summary>
+        /// Atualiza parcialmente uma Party Interaction.
+        /// </summary>
+        [HttpPatch("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Update(string id, [FromBody] PartyInteractionUpdateDto updateDto)
         {
-            return StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+            var (updatedInteraction, errorMessage) = await _service.UpdateAsync(id, updateDto);
+
+            if (errorMessage != null)
+            {
+                if (errorMessage.Contains("não encontrada"))
+                    return NotFound(ApiResponse<object>.Fail(errorMessage, StatusCodes.Status404NotFound));
+
+                return BadRequest(ApiResponse<object>.Fail(errorMessage));
+            }
+
+            return NoContent();
         }
 
-        // 3. Conversão e persistência
-        var interaction = _mapper.Map<PartyInteraction>(interactionDto);
-
-        // Define valores padrão para os campos
-        interaction.Id = Guid.NewGuid().ToString();
-        interaction.CreationDate = DateTime.UtcNow;
-        interaction.LastUpdateDate = DateTime.UtcNow;
-        interaction.Status = "Iniciado"; // ou outro status inicial padrão
-
-        foreach (var relatedPartyRef in interaction.RelatedParty)
+        /// <summary>
+        /// Deleta uma Party Interaction.
+        /// </summary>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete(string id)
         {
-            relatedPartyRef.PartyInteractionId = interaction.Id;
+            var (success, errorMessage) = await _service.DeleteAsync(id);
+
+            if (!success)
+            {
+                return NotFound(ApiResponse<object>.Fail(errorMessage, StatusCodes.Status404NotFound));
+            }
+
+            return NoContent();
         }
-
-        _context.PartyInteractions.Add(interaction);
-        await _context.SaveChangesAsync();
-
-        // 4. Retorno HTTP com o recurso criado
-        var createdInteractionDto = _mapper.Map<PartyInteractionCreateDto>(interaction);
-        return CreatedAtAction(nameof(GetPartyInteractionsById), new { id = interaction.Id}, createdInteractionDto);
-    }
-
-
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePartyInteraction(string id)
-    {
-        //TO DO - Implementar lógica de exclusão
-        return NoContent();
     }
 }
