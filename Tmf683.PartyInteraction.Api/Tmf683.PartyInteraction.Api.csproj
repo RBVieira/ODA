@@ -22,7 +22,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Migrations\" />
+	  <ProjectReference Include="..\Tmf683.PartyInteraction.Application\Tmf683.PartyInteraction.Application.csproj" />
+	  <ProjectReference Include="..\Tmf683.PartyInteraction.Infrastructure\Tmf683.PartyInteraction.Infrastructure.csproj" />
 	</ItemGroup>
 
 </Project>

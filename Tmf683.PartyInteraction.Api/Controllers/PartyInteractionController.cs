@@ -1,16 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Tmf683.PartyInteraction.Api.Data;
-using Tmf683.PartyInteraction.Api.Models.Dtos.Responses;
-using Tmf683.PartyInteraction.Api.Models.Dtos.Requests;
-using AutoMapper;
-using System.Net.Http;
+﻿using AutoMapper;
 using System.Net;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Tmf683.PartyInteraction.Application.Models.Dtos.Requests;
+using Tmf683.PartyInteraction.Application.Models.Dtos.Responses;
+using Tmf683.PartyInteraction.Application.Models.APIs;
+using Tmf683.PartyInteraction.Application.Services.Interfaces;
+using Tmf683.PartyInteraction.Domain.Entities;
 using Microsoft.Extensions.Options;
-using Tmf683.PartyInteraction.Api.Models.APIs;
-using Tmf683.PartyInteraction.Api.Services.Interfaces;
-using Tmf683.PartyInteraction.Api.Models.Entities;
-using System.Data;
+using Tmf683.PartyInteraction.Infrastructure.Data;
+
 
 
 

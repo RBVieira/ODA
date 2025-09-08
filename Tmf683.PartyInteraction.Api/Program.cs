@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
-using Tmf683.PartyInteraction.Api.Data;
-using Tmf683.PartyInteraction.Api.Mappings;
-using Tmf683.PartyInteraction.Api.Models.APIs;
-using Tmf683.PartyInteraction.Api.Services.Interfaces;
-using Tmf683.PartyInteraction.Api.Services;
-using Tmf683.PartyInteraction.Api.Repositories;
-using Tmf683.PartyInteraction.Api.Repositories.Interfaces;
+using Tmf683.PartyInteraction.Infrastructure.Data;
+using Tmf683.PartyInteraction.Application.Mappings;
+using Tmf683.PartyInteraction.Application.Models.APIs;
+using Tmf683.PartyInteraction.Application.Services.Interfaces;
+using Tmf683.PartyInteraction.Application.Services;
+using Tmf683.PartyInteraction.Application.Repositories;
+using Tmf683.PartyInteraction.Application.Repositories.Interfaces;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,16 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //Meus serviços
+builder.Services.AddDbContext<PartyInteractionDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        // INFORMA AO EF ONDE ENCONTRAR AS MIGRAÇÕES
+        b => b.MigrationsAssembly("Tmf683.PartyInteraction.Infrastructure")
+    )
+);
+
+
+
 // Serviço de conexão ao banco de dados Microsoft SQL.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<PartyInteractionDbContext>(options => options.UseSqlServer(connectionString));

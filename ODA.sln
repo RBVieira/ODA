@@ -7,6 +7,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tmf632.PartyManagement.Api"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tmf683.PartyInteraction.Api", "Tmf683.PartyInteraction.Api\Tmf683.PartyInteraction.Api.csproj", "{9ABEC49E-AED5-47F4-B62F-8DF1686FC261}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tmf683.PartyInteraction.Domain", "Tmf683.PartyInteraction.Domain\Tmf683.PartyInteraction.Domain.csproj", "{BA58F2BC-8AEB-424F-8097-B65E948E517E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tmf683.PartyInteraction.Application", "Tmf683.PartyInteraction.Application\Tmf683.PartyInteraction.Application.csproj", "{C7FDD456-1CEF-4CAB-B946-1938817A69B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tmf683.PartyInteraction.Infrastructure", "Tmf683.PartyInteraction.Infrastructure\Tmf683.PartyInteraction.Infrastructure.csproj", "{3327489E-A6D3-4078-BF90-3A8635CC661E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +27,18 @@ Global
 		{9ABEC49E-AED5-47F4-B62F-8DF1686FC261}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9ABEC49E-AED5-47F4-B62F-8DF1686FC261}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9ABEC49E-AED5-47F4-B62F-8DF1686FC261}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA58F2BC-8AEB-424F-8097-B65E948E517E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA58F2BC-8AEB-424F-8097-B65E948E517E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA58F2BC-8AEB-424F-8097-B65E948E517E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA58F2BC-8AEB-424F-8097-B65E948E517E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7FDD456-1CEF-4CAB-B946-1938817A69B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7FDD456-1CEF-4CAB-B946-1938817A69B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7FDD456-1CEF-4CAB-B946-1938817A69B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7FDD456-1CEF-4CAB-B946-1938817A69B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3327489E-A6D3-4078-BF90-3A8635CC661E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3327489E-A6D3-4078-BF90-3A8635CC661E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3327489E-A6D3-4078-BF90-3A8635CC661E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3327489E-A6D3-4078-BF90-3A8635CC661E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
