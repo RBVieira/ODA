@@ -1,6 +1,6 @@
 ﻿using Tmf683.PartyInteraction.Application.Models.Dtos.Requests;
 using Tmf683.PartyInteraction.Application.Models.Dtos.Responses;
-using PartyInteractionEntity = Tmf683.PartyInteraction.Domain.Entities.PartyInteraction;
+using PartyInteractionEntity = Tmf683.PartyInteraction.Domain.Entities.PartyInteraction; //Um alias para a entidade PartyInteraction
 
 namespace Tmf683.PartyInteraction.Application.Services.Interfaces
 {
