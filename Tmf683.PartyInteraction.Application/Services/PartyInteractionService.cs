@@ -46,9 +46,11 @@ namespace Tmf683.PartyInteraction.Application.Services
         {
             // 1. Orquestração: Validar se as Partes Relacionadas existem na API TMF632
             var client = _httpClientFactory.CreateClient("PartyManagementClient");
+
             foreach (var partyRefDto in createDto.RelatedParty)
             {
                 var endpointUrl = $"{_tmf632Config.BaseUrl}{_tmf632Config.GetIndividualEndpoint}{partyRefDto.Id}";
+                
                 var response = await client.GetAsync(endpointUrl);
                 if (response.StatusCode == HttpStatusCode.NotFound)
                 {
